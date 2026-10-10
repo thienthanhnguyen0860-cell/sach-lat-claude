@@ -1,0 +1,288 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Sách lật 99 trang: giáo trình Claude 18 bài, 3 cấp độ, hướng dẫn cầm tay chỉ việc. Tác giả Nguyễn Thanh Thiên.">
+<meta property="og:title" content="Claude từ căn bản đến làm chủ">
+<meta property="og:description" content="Giáo trình Claude 18 bài · 3 cấp độ · 99 trang. Tác giả Nguyễn Thanh Thiên.">
+<meta property="og:type" content="book">
+<title>Claude từ căn bản đến làm chủ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600&family=Lora:ital,wght@0,600;0,700;1,500&display=swap&subset=vietnamese">
+<style>
+/* Bàn đọc tối dưới ánh đèn: sách mở ở giữa, thanh điều khiển gọn bên dưới, mục lục trượt từ phải */
+:root{
+  --desk:#15100c; --desk-2:#211912; --lamp:rgba(214,170,98,.16);
+  --ink:#f1e7d6; --muted:#b8a78f; --gold:#cf9f52; --gold-dim:#8a6a3a;
+  --panel:#1d1610; --line:rgba(241,231,214,.12);
+  --display:"Lora",Georgia,"Times New Roman",serif;
+  --ui:"Be Vietnam Pro",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  color-scheme:dark;
+}
+html,body{height:100%}
+[hidden]{display:none!important}
+body{margin:0;background:var(--desk);color:var(--ink);font-family:var(--ui);font-size:14px;overflow:hidden}
+.app{height:100%;display:flex;flex-direction:column;
+  background:radial-gradient(ellipse 70% 55% at 50% 42%,var(--lamp),transparent 70%),
+             linear-gradient(180deg,var(--desk-2),var(--desk) 60%)}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:12px 20px 6px;min-width:0}
+.brand{min-width:0}
+.brand h1{font-family:var(--display);font-weight:700;font-size:clamp(16px,2.2vw,21px);margin:0;
+  letter-spacing:.005em;text-wrap:balance;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.brand p{margin:2px 0 0;color:var(--muted);font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.brand p b{color:var(--gold);font-weight:600}
+.stage{flex:1;min-height:0;display:flex;align-items:center;justify-content:center;padding:6px 16px;position:relative;overflow:hidden}
+#book{margin:0 auto;filter:drop-shadow(0 18px 30px rgba(0,0,0,.55))}
+.loading{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;
+  color:var(--muted);font-size:13px}
+.loading .bar{width:220px;max-width:70%;height:3px;background:var(--line);border-radius:3px;overflow:hidden}
+.loading .bar i{display:block;height:100%;width:0;background:var(--gold);transition:width .2s}
+.loading img{width:120px;border-radius:3px;box-shadow:0 10px 24px rgba(0,0,0,.5)}
+
+.controls{position:relative;z-index:5;display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap;
+  padding:8px 16px calc(12px + env(safe-area-inset-bottom,0px))}
+button{font:500 13px var(--ui);color:var(--ink);background:transparent;border:1px solid var(--line);
+  border-radius:999px;height:38px;padding:0 14px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;
+  transition:border-color .15s,background .15s}
+button:hover{border-color:var(--gold-dim);background:rgba(207,159,82,.08)}
+button:focus-visible,input:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+button.icon{width:38px;padding:0;justify-content:center;font-size:18px;line-height:1}
+button:disabled{opacity:.35;cursor:default;background:transparent;border-color:var(--line)}
+.scrub{display:flex;align-items:center;gap:10px;min-width:0;flex:0 1 380px}
+.scrub input{flex:1;min-width:80px;accent-color:var(--gold)}
+.pg{font-variant-numeric:tabular-nums;color:var(--muted);font-size:12.5px;white-space:nowrap;min-width:92px;text-align:center}
+.pg b{color:var(--ink);font-weight:600}
+
+/* Mục lục */
+.toc{position:fixed;top:0;right:0;bottom:0;width:min(360px,92vw);background:var(--panel);
+  border-left:1px solid var(--line);transform:translateX(100%);transition:transform .28s ease;z-index:20;
+  display:flex;flex-direction:column;padding-top:env(safe-area-inset-top,0px)}
+.toc.open{transform:none}
+.toc-head{display:flex;align-items:center;justify-content:space-between;padding:16px 18px 10px}
+.toc-head h2{font-family:var(--display);font-size:19px;margin:0}
+.toc ol{list-style:none;margin:0;padding:0 8px 24px;overflow-y:auto;flex:1}
+.toc li a{display:flex;justify-content:space-between;gap:12px;padding:7px 10px;border-radius:8px;color:var(--ink);
+  text-decoration:none;font-size:13.5px;line-height:1.35}
+.toc li a:hover,.toc li a.on{background:rgba(207,159,82,.1)}
+.toc li a.on{color:var(--gold)}
+.toc li a span:last-child{color:var(--muted);font-variant-numeric:tabular-nums;flex:none}
+.toc li.lv a{font-family:var(--display);font-weight:600;font-size:14.5px;margin-top:10px;color:var(--gold)}
+.toc li.ls a{padding-left:22px}
+.scrim{position:fixed;inset:0;background:rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:opacity .28s;z-index:15}
+.scrim.on{opacity:1;pointer-events:auto}
+.hint{position:relative;z-index:5;color:var(--muted);font-size:12px;text-align:center;margin:0 0 2px}
+.fallback img{max-height:100%;max-width:100%;box-shadow:0 18px 30px rgba(0,0,0,.55)}
+@media (max-width:640px){
+  header{padding:10px 16px 4px}
+  .brand p{display:none}
+  .btn-label{display:none}
+  .controls{gap:8px}
+  .scrub{order:-1;flex-basis:100%}
+}
+@media (prefers-reduced-motion:reduce){.toc,.scrim{transition:none}}
+.dl{text-decoration:none;color:var(--ink);border:1px solid var(--gold-dim);border-radius:999px;height:38px;padding:0 14px;
+  display:inline-flex;align-items:center;gap:7px;font:500 13px var(--ui);background:rgba(207,159,82,.1)}
+.dl:hover{background:rgba(207,159,82,.2)}
+.dl:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+</style>
+</head>
+<body>
+
+<div class="app">
+  <header>
+    <div class="brand">
+      <h1>Claude từ căn bản đến làm chủ</h1>
+      <p>18 bài · 3 cấp độ · 99 trang · Tác giả <b>Nguyễn Thanh Thiên</b></p>
+    </div>
+    <button id="tocBtn" aria-controls="toc" aria-expanded="false"><span aria-hidden="true">☰</span><span class="btn-label">Mục lục</span></button>
+  </header>
+
+  <div class="stage" id="stage">
+    <div id="book"></div>
+    <div class="loading" id="loading">
+      <img src="p/001.webp" alt="Bìa sách Claude từ căn bản đến làm chủ">
+      <div>Đang mở sách…</div>
+      <div class="bar"><i id="barFill"></i></div>
+    </div>
+  </div>
+
+  <p class="hint" id="hint">Kéo góc trang hoặc dùng phím ← → để lật</p>
+  <div class="controls">
+    <button class="icon" id="first" aria-label="Về trang bìa">⇤</button>
+    <button class="icon" id="prev" aria-label="Trang trước">‹</button>
+    <div class="scrub">
+      <input type="range" id="scrub" min="1" max="99" value="1" aria-label="Chọn trang">
+      <span class="pg" id="pg">Trang <b>1</b> / 99</span>
+    </div>
+    <button class="icon" id="next" aria-label="Trang sau">›</button>
+    <button id="fs"><span aria-hidden="true">⛶</span><span class="btn-label">Toàn màn hình</span></button>
+    <a class="dl" href="Claude-tu-can-ban-den-lam-chu_Nguyen-Thanh-Thien.pdf" download><span aria-hidden="true">⤓</span><span class="btn-label">Tải PDF</span></a>
+  </div>
+</div>
+
+<div class="scrim" id="scrim"></div>
+<aside class="toc" id="toc" aria-label="Mục lục">
+  <div class="toc-head"><h2>Mục lục</h2><button class="icon" id="tocClose" aria-label="Đóng mục lục">×</button></div>
+  <ol id="tocList"></ol>
+</aside>
+
+<script src="js/page-flip.browser.js"></script>
+<script>
+(function(){
+  var TOTAL = 99, RATIO = 1755/1240;
+  var pages = []; for (var i=1;i<=TOTAL;i++) pages.push('p/' + String(i).padStart(3,'0') + '.webp');
+
+  var TOC = [
+    ['ls','Bìa',1],['ls','Mục lục',2],['ls','Tổng quan khóa học',3],
+    ['lv','Cấp độ 1 · Bắt đầu từ căn bản',7],
+    ['ls','Bài 1. Claude cho người mới',8],['ls','Bài 2. Nhập môn viết câu lệnh',14],
+    ['ls','Bài 3. Nhận chứng chỉ Claude',20],['ls','Bài 4. Claude cho người không biết công nghệ',25],
+    ['ls','Bài 5. Tránh lệ thuộc AI',30],['ls','Bài 6. 32 mẹo sử dụng Claude',34],
+    ['lv','Cấp độ 2 · Đưa Claude vào công việc',38],
+    ['ls','Bài 7. Opus 5.5',39],['ls','Bài 8. Claude cho đội nhóm',43],['ls','Bài 9. Thiết kế với Claude',48],
+    ['ls','Bài 10. Bảo vệ quyền riêng tư',53],['ls','Bài 11. Sửa cách viết sáo rỗng',58],['ls','Bài 12. Tạo kỹ năng cho Claude',62],
+    ['lv','Cấp độ 3 · Cá nhân hoá và làm chủ',67],
+    ['ls','Bài 13. Claude viết đúng giọng bạn',68],['ls','Bài 14. Tránh chạm giới hạn Claude',72],
+    ['ls','Bài 15. Tạo đồ họa thông tin',76],['ls','Bài 16. Claude thay tôi làm việc',80],
+    ['ls','Bài 17. Nhận biết cách viết của AI',85],['ls','Bài 18. Chuyển giữa Claude và ChatGPT',89],
+    ['lv','Phụ lục',93],
+    ['ls','A · Dự án tốt nghiệp',93],['ls','B · Thư viện 15 câu lệnh',95],['ls','C · Thuật ngữ và nguồn',96],
+    ['lv','Tác giả',98],['ls','Về tác giả',98],['ls','Mời cafe tác giả',99]
+  ];
+
+  var $ = function(id){return document.getElementById(id)};
+  var book = $('book'), stage = $('stage'), scrub = $('scrub'), pg = $('pg');
+  var toc = $('toc'), scrim = $('scrim'), list = $('tocList');
+  var current = 1, pf = null, fallbackImg = null;
+
+  function startPage(){
+    var m = (location.hash||'').match(/^#trang-(\d+)$/);
+    var n = m ? parseInt(m[1],10) : 1;
+    return Math.min(Math.max(n,1),TOTAL);
+  }
+  function portrait(){ return stage.clientWidth < 760; }
+  function sizeBook(){
+    var W = stage.clientWidth - 32, H = stage.clientHeight - 12;
+    var cols = portrait() ? 1 : 2;
+    var pw = Math.max(200, Math.min(W/cols, H/RATIO));
+    book.style.width = Math.floor(pw*cols) + 'px';
+    book.style.height = Math.floor(pw*RATIO) + 'px';
+    return Math.floor(pw);
+  }
+
+  // Mục lục
+  TOC.forEach(function(t){
+    var li = document.createElement('li'); li.className = t[0];
+    var a = document.createElement('a'); a.href = '#trang-' + t[2]; a.dataset.page = t[2];
+    a.innerHTML = '<span></span><span></span>';
+    a.firstChild.textContent = t[1]; a.lastChild.textContent = t[2];
+    a.addEventListener('click', function(e){ e.preventDefault(); go(t[2]); closeToc(); });
+    li.appendChild(a); list.appendChild(li);
+  });
+  function openToc(){ toc.classList.add('open'); scrim.classList.add('on'); $('tocBtn').setAttribute('aria-expanded','true'); }
+  function closeToc(){ toc.classList.remove('open'); scrim.classList.remove('on'); $('tocBtn').setAttribute('aria-expanded','false'); }
+  $('tocBtn').addEventListener('click', openToc);
+  $('tocClose').addEventListener('click', closeToc);
+  scrim.addEventListener('click', closeToc);
+
+  function show(n){
+    current = n;
+    scrub.value = n;
+    pg.innerHTML = 'Trang <b>' + n + '</b> / ' + TOTAL;
+    $('prev').disabled = $('first').disabled = n <= 1;
+    $('next').disabled = n >= TOTAL;
+    var active = null;
+    list.querySelectorAll('a').forEach(function(a){
+      a.classList.remove('on'); if (+a.dataset.page <= n) active = a;
+    });
+    if (active) active.classList.add('on');
+    try { history.replaceState(null,'','#trang-' + n); } catch(e){}
+  }
+  function go(n){
+    n = Math.min(Math.max(n,1),TOTAL);
+    if (pf){
+      var idx = n-1;
+      if (Math.abs(idx - pf.getCurrentPageIndex()) <= 2) pf.flip(idx); else pf.turnToPage(idx);
+      show(n);
+    } else if (fallbackImg){ fallbackImg.src = pages[n-1]; show(n); }
+  }
+  $('prev').addEventListener('click', function(){ pf ? pf.flipPrev() : go(current-1); });
+  $('next').addEventListener('click', function(){ pf ? pf.flipNext() : go(current+1); });
+  $('first').addEventListener('click', function(){ go(1); });
+  scrub.addEventListener('input', function(){ pg.innerHTML = 'Trang <b>' + scrub.value + '</b> / ' + TOTAL; });
+  scrub.addEventListener('change', function(){ go(+scrub.value); });
+  document.addEventListener('keydown', function(e){
+    if (e.target && e.target.tagName === 'INPUT') return;
+    if (e.key === 'ArrowRight' || e.key === 'PageDown'){ e.preventDefault(); $('next').click(); }
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp'){ e.preventDefault(); $('prev').click(); }
+    else if (e.key === 'Home'){ go(1); } else if (e.key === 'End'){ go(TOTAL); }
+    else if (e.key === 'Escape'){ closeToc(); }
+  });
+  $('fs').addEventListener('click', function(){
+    try {
+      if (document.fullscreenElement) document.exitFullscreen();
+      else document.documentElement.requestFullscreen().catch(function(){});
+    } catch(e){}
+  });
+
+  // Tải trước ảnh để hiện tiến độ
+  var loaded = 0, bar = $('barFill');
+  function preload(done){
+    var first = Math.min(12, TOTAL), finished = false;
+    pages.forEach(function(src, i){
+      var im = new Image();
+      im.onload = im.onerror = function(){
+        loaded++; bar.style.width = Math.round(loaded/TOTAL*100) + '%';
+        if (!finished && loaded >= first){ finished = true; done(); }
+      };
+      im.src = src;
+    });
+  }
+
+  function build(startIdx){
+    var pw = sizeBook(), ph = Math.floor(pw*RATIO);
+    var holder = document.createElement('div');
+    book.innerHTML = ''; book.appendChild(holder);
+    pf = new St.PageFlip(holder, {
+      width: pw, height: ph, size: 'fixed',
+      showCover: true, usePortrait: true, maxShadowOpacity: .45, flippingTime: 700,
+      mobileScrollSupport: false, startPage: startIdx, autoSize: false
+    });
+    pf.loadFromImages(pages);
+    pf.on('flip', function(e){ show(e.data + 1); });
+  }
+  function startFlip(){
+    var start = startPage();
+    build(start-1);
+    show(start);
+    $('loading').hidden = true;
+    var t, lastMode = portrait(), lastW = stage.clientWidth, lastH = stage.clientHeight;
+    window.addEventListener('resize', function(){
+      clearTimeout(t); t = setTimeout(function(){
+        if (Math.abs(stage.clientWidth-lastW) < 24 && Math.abs(stage.clientHeight-lastH) < 24 && portrait() === lastMode) return;
+        lastMode = portrait(); lastW = stage.clientWidth; lastH = stage.clientHeight;
+        var keep = current - 1;
+        try { pf.destroy(); } catch(e){}
+        build(keep);
+      }, 180);
+    });
+  }
+  function startFallback(){
+    $('loading').hidden = true; $('hint').textContent = 'Dùng nút ‹ › hoặc phím ← → để chuyển trang';
+    book.className = 'fallback'; book.style.width = '100%'; book.style.height = '100%';
+    book.style.display = 'flex'; book.style.alignItems = 'center'; book.style.justifyContent = 'center';
+    fallbackImg = document.createElement('img'); fallbackImg.alt = 'Trang sách';
+    book.appendChild(fallbackImg); go(startPage());
+  }
+
+  preload(function(){
+    if (window.St && window.St.PageFlip){ try { startFlip(); } catch(e){ pf = null; startFallback(); } }
+    else startFallback();
+  });
+})();
+</script>
+</body>
+</html>
