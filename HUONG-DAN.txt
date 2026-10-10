@@ -1,0 +1,31 @@
+SÁCH LẬT "CLAUDE TỪ CĂN BẢN ĐẾN LÀM CHỦ" – GÓI WEB ĐỘC LẬP
+Tác giả: Nguyễn Thanh Thiên · Zalo 0903 788 549 · thien7178@gmail.com
+
+NỘI DUNG GÓI
+- index.html ............ trang sách lật (mở trang này là xem được)
+- p/ .................... 99 ảnh trang sách
+- js/page-flip.browser.js thư viện lật trang (đã kèm sẵn, không cần mạng ngoài)
+- Claude-tu-can-ban-den-lam-chu_Nguyen-Thanh-Thien.pdf ... file PDF cho nút "Tải PDF"
+- HUONG-DAN.txt ......... file này
+
+LƯU Ý: Giữ nguyên cấu trúc thư mục. Đừng đổi tên file/thư mục.
+Mở trực tiếp index.html bằng cách bấm đúp trên máy có thể không lật được trang
+(trình duyệt chặn ảnh khi mở file cục bộ). Hãy đưa lên một trang web như dưới đây.
+
+CÁCH 1 – GITHUB PAGES (miễn phí, link cố định)
+1. Đăng nhập github.com (tạo tài khoản miễn phí nếu chưa có).
+2. Bấm "+" góc trên phải -> "New repository". Đặt tên, ví dụ: sach-lat-claude. Chọn Public -> "Create repository".
+3. Bấm "uploading an existing file". Kéo thả các file trong thư mục này vào.
+   GitHub giới hạn 100 file mỗi lần tải: lần 1 kéo thư mục "p", bấm "Commit changes";
+   lần 2 kéo index.html, thư mục js, file PDF, HUONG-DAN.txt, bấm "Commit changes".
+4. Vào "Settings" -> "Pages". Mục "Branch" chọn "main", thư mục "/ (root)" -> "Save".
+5. Đợi 1–2 phút, link có dạng: https://<ten-tai-khoan>.github.io/sach-lat-claude/
+
+CÁCH 2 – ĐƯA LÊN WEBSITE CÓ SẴN (ví dụ website Thiên AI)
+- Tải cả thư mục lên hosting (qua File Manager hoặc FTP), ví dụ vào /sach-lat-claude/
+- Link: https://ten-mien-cua-ban/sach-lat-claude/
+
+NHÚNG SÁCH LẬT VÀO MỘT TRANG WEB KHÁC (dán đoạn mã sau, thay đường link):
+<iframe src="https://ten-mien-cua-ban/sach-lat-claude/" style="width:100%;height:85vh;border:0" allowfullscreen loading="lazy"></iframe>
+
+MỞ ĐÚNG MỘT TRANG: thêm #trang-SỐ vào cuối link, ví dụ .../sach-lat-claude/#trang-39 (mở Bài 7).
