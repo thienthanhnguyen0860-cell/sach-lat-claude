@@ -74,6 +74,9 @@ button:disabled{opacity:.35;cursor:default;background:transparent;border-color:v
 .scrim{position:fixed;inset:0;background:rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:opacity .28s;z-index:15}
 .scrim.on{opacity:1;pointer-events:auto}
 .hint{position:relative;z-index:5;color:var(--muted);font-size:12px;text-align:center;margin:0 0 2px}
+.stage.zoomed{align-items:flex-start;overflow-y:auto;overscroll-behavior:contain}
+.stage.zoomed #book{margin-block:4px 16px}
+button[aria-pressed="true"]{border-color:var(--gold);color:var(--gold)}
 .fallback img{max-height:100%;max-width:100%;box-shadow:0 18px 30px rgba(0,0,0,.55)}
 @media (max-width:640px){
   header{padding:10px 16px 4px}
@@ -118,6 +121,8 @@ button:disabled{opacity:.35;cursor:default;background:transparent;border-color:v
       <span class="pg" id="pg">Trang <b>1</b> / 99</span>
     </div>
     <button class="icon" id="next" aria-label="Trang sau">›</button>
+    <button id="zoom" aria-pressed="false"><span aria-hidden="true">⊕</span><span class="btn-label" id="zoomLabel">Phóng to</span></button>
+    <button id="mode" aria-pressed="false"><span aria-hidden="true">▭</span><span class="btn-label" id="modeLabel">Xem 2 trang</span></button>
     <button id="fs"><span aria-hidden="true">⛶</span><span class="btn-label">Toàn màn hình</span></button>
     <a class="dl" href="Claude-tu-can-ban-den-lam-chu_Nguyen-Thanh-Thien.pdf" download><span aria-hidden="true">⤓</span><span class="btn-label">Tải PDF</span></a>
   </div>
@@ -163,11 +168,24 @@ button:disabled{opacity:.35;cursor:default;background:transparent;border-color:v
     var n = m ? parseInt(m[1],10) : 1;
     return Math.min(Math.max(n,1),TOTAL);
   }
-  function portrait(){ return stage.clientWidth < 760; }
+  var MODE = '1';
+  try { MODE = localStorage.getItem('flipMode') === '2' ? '2' : '1'; } catch(e){}
+  function narrow(){ return stage.clientWidth < 760; }
+  function portrait(){ return MODE === '1' || narrow(); }
+  function syncMode(){
+    var b = $('mode'); if (!b) return;
+    b.hidden = narrow();
+    b.setAttribute('aria-pressed', MODE === '2' ? 'true' : 'false');
+    $('modeLabel').textContent = MODE === '2' ? 'Xem 1 trang' : 'Xem 2 trang';
+    b.firstChild.textContent = MODE === '2' ? '▯' : '▭';
+  }
+  var ZOOM = false;
   function sizeBook(){
+    stage.classList.toggle('zoomed', ZOOM);
     var W = stage.clientWidth - 32, H = stage.clientHeight - 12;
     var cols = portrait() ? 1 : 2;
-    var pw = Math.max(200, Math.min(W/cols, H/RATIO));
+    var pw = ZOOM ? Math.max(200, Math.min(W/cols, cols === 1 ? 1100 : 900))
+                  : Math.max(200, Math.min(W/cols, H/RATIO));
     book.style.width = Math.floor(pw*cols) + 'px';
     book.style.height = Math.floor(pw*RATIO) + 'px';
     return Math.floor(pw);
@@ -220,6 +238,8 @@ button:disabled{opacity:.35;cursor:default;background:transparent;border-color:v
     else if (e.key === 'ArrowLeft' || e.key === 'PageUp'){ e.preventDefault(); $('prev').click(); }
     else if (e.key === 'Home'){ go(1); } else if (e.key === 'End'){ go(TOTAL); }
     else if (e.key === 'Escape'){ closeToc(); }
+    else if ((e.key === '+' || e.key === '=') && !ZOOM && pf){ $('zoom').click(); }
+    else if (e.key === '-' && ZOOM && pf){ $('zoom').click(); }
   });
   $('fs').addEventListener('click', function(){
     try {
@@ -249,13 +269,31 @@ button:disabled{opacity:.35;cursor:default;background:transparent;border-color:v
     pf = new St.PageFlip(holder, {
       width: pw, height: ph, size: 'fixed',
       showCover: true, usePortrait: true, maxShadowOpacity: .45, flippingTime: 700,
-      mobileScrollSupport: false, startPage: startIdx, autoSize: false
+      mobileScrollSupport: ZOOM, startPage: startIdx, autoSize: false
     });
     pf.loadFromImages(pages);
-    pf.on('flip', function(e){ show(e.data + 1); });
+    pf.on('flip', function(e){ show(e.data + 1); if (ZOOM) stage.scrollTop = 0; });
   }
   function startFlip(){
     var start = startPage();
+    syncMode();
+    $('zoom').addEventListener('click', function(){
+      ZOOM = !ZOOM;
+      this.setAttribute('aria-pressed', ZOOM ? 'true' : 'false');
+      $('zoomLabel').textContent = ZOOM ? 'Vừa màn hình' : 'Phóng to';
+      this.firstChild.textContent = ZOOM ? '⊖' : '⊕';
+      var keep = current - 1;
+      try { pf.destroy(); } catch(e){}
+      build(keep); stage.scrollTop = 0;
+    });
+    $('mode').addEventListener('click', function(){
+      MODE = MODE === '2' ? '1' : '2';
+      try { localStorage.setItem('flipMode', MODE); } catch(e){}
+      syncMode();
+      var keep = current - 1;
+      try { pf.destroy(); } catch(e){}
+      build(keep);
+    });
     build(start-1);
     show(start);
     $('loading').hidden = true;
@@ -264,6 +302,7 @@ button:disabled{opacity:.35;cursor:default;background:transparent;border-color:v
       clearTimeout(t); t = setTimeout(function(){
         if (Math.abs(stage.clientWidth-lastW) < 24 && Math.abs(stage.clientHeight-lastH) < 24 && portrait() === lastMode) return;
         lastMode = portrait(); lastW = stage.clientWidth; lastH = stage.clientHeight;
+        syncMode();
         var keep = current - 1;
         try { pf.destroy(); } catch(e){}
         build(keep);
@@ -271,6 +310,7 @@ button:disabled{opacity:.35;cursor:default;background:transparent;border-color:v
     });
   }
   function startFallback(){
+    $('mode').hidden = true; $('zoom').hidden = true;
     $('loading').hidden = true; $('hint').textContent = 'Dùng nút ‹ › hoặc phím ← → để chuyển trang';
     book.className = 'fallback'; book.style.width = '100%'; book.style.height = '100%';
     book.style.display = 'flex'; book.style.alignItems = 'center'; book.style.justifyContent = 'center';
